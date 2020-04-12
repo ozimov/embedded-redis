@@ -17,8 +17,8 @@ abstract class AbstractRedisInstance implements Redis {
     private final int port;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
-	private PrintStream err = System.out;
-	private PrintStream out = null;
+    private PrintStream out = null; //Ignore Redis output.
+    private PrintStream err = System.err; //Forward Redis error messages to STDERR.
 
     protected AbstractRedisInstance(int port) {
         this.port = port;

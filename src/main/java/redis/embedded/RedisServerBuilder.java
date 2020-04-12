@@ -22,8 +22,8 @@ public class RedisServerBuilder {
     private int port = 6379;
     private InetSocketAddress slaveOf;
     private String redisConf;
-    private PrintStream out;
-    private PrintStream err;
+    private PrintStream out = null; //Ignore Redis output.
+    private PrintStream err = System.err; //Forward Redis error messages to STDERR.
 
     private StringBuilder redisConfigBuilder;
 
