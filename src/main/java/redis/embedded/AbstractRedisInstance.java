@@ -147,7 +147,7 @@ abstract class AbstractRedisInstance implements Redis {
                 	outputStream.println(line);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                /* reader has been closed. The connected Redis instance has possibly shut down. */
             }
         }
     }
