@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class RedisClusterBuilder {
-    private RedisSentinelBuilder sentinelBuilder = new RedisSentinelBuilder();
-    private RedisServerBuilder serverBuilder = new RedisServerBuilder();
+    private Supplier<RedisSentinelBuilder> sentinelBuilder = RedisSentinelBuilder::new;
+    private Supplier<RedisServerBuilder> serverBuilder = RedisServerBuilder::new;
     private int sentinelCount = 1;
     private int quorumSize = 1;
     private PortProvider sentinelPortProvider = new SequencePortProvider(26379);
@@ -19,11 +20,21 @@ public class RedisClusterBuilder {
     private final List<ReplicationGroup> groups = new LinkedList<ReplicationGroup>();
 
     public RedisClusterBuilder withSentinelBuilder(RedisSentinelBuilder sentinelBuilder) {
+        this.sentinelBuilder = () -> sentinelBuilder;
+        return this;
+    }
+
+    public RedisClusterBuilder withSentinelBuilder(Supplier<RedisSentinelBuilder> sentinelBuilder) {
         this.sentinelBuilder = sentinelBuilder;
         return this;
     }
 
     public RedisClusterBuilder withServerBuilder(RedisServerBuilder serverBuilder) {
+        this.serverBuilder = () -> serverBuilder;
+        return this;
+    }
+
+    public RedisClusterBuilder withServerBuilder(Supplier<RedisServerBuilder> serverBuilder) {
         this.serverBuilder = serverBuilder;
         return this;
     }
@@ -84,7 +95,7 @@ public class RedisClusterBuilder {
 
     private List<Redis> buildServers() {
         List<Redis> servers = new ArrayList<Redis>();
-        for(ReplicationGroup g : groups) {
+        for (ReplicationGroup g : groups) {
             servers.add(buildMaster(g));
             buildSlaves(servers, g);
         }
@@ -93,17 +104,16 @@ public class RedisClusterBuilder {
 
     private void buildSlaves(List<Redis> servers, ReplicationGroup g) {
         for (Integer slavePort : g.slavePorts) {
-            serverBuilder.reset();
-            serverBuilder.port(slavePort);
-            serverBuilder.slaveOf("localhost", g.masterPort);
-            final RedisServer slave = serverBuilder.build();
+            RedisServer slave = serverBuilder.get()
+                    .port(slavePort)
+                    .slaveOf("localhost", g.masterPort)
+                    .build();
             servers.add(slave);
         }
     }
 
     private Redis buildMaster(ReplicationGroup g) {
-        serverBuilder.reset();
-        return serverBuilder.port(g.masterPort).build();
+        return serverBuilder.get().port(g.masterPort).build();
     }
 
     private List<Redis> buildSentinels() {
@@ -116,15 +126,14 @@ public class RedisClusterBuilder {
     }
 
     private Redis buildSentinel() {
-        sentinelBuilder.reset();
-        sentinelBuilder.port(nextSentinelPort());
-        for(ReplicationGroup g : groups) {
-            sentinelBuilder.masterName(g.masterName);
-            sentinelBuilder.masterPort(g.masterPort);
-            sentinelBuilder.quorumSize(quorumSize);
-            sentinelBuilder.addDefaultReplicationGroup();
+        RedisSentinelBuilder builder = sentinelBuilder.get().port(nextSentinelPort());
+        for (ReplicationGroup g : groups) {
+            builder.masterName(g.masterName);
+            builder.masterPort(g.masterPort);
+            builder.quorumSize(quorumSize);
+            builder.addDefaultReplicationGroup();
         }
-        return sentinelBuilder.build();
+        return builder.build();
     }
 
     private int nextSentinelPort() {
