@@ -20,7 +20,10 @@ public class RedisClusterBuilder {
     private final List<ReplicationGroup> groups = new LinkedList<ReplicationGroup>();
 
     public RedisClusterBuilder withSentinelBuilder(RedisSentinelBuilder sentinelBuilder) {
-        this.sentinelBuilder = () -> sentinelBuilder;
+        this.sentinelBuilder = () -> {
+            sentinelBuilder.reset();
+            return sentinelBuilder;
+        };
         return this;
     }
 
@@ -30,7 +33,10 @@ public class RedisClusterBuilder {
     }
 
     public RedisClusterBuilder withServerBuilder(RedisServerBuilder serverBuilder) {
-        this.serverBuilder = () -> serverBuilder;
+        this.serverBuilder = () -> {
+            serverBuilder.reset();
+            return serverBuilder;
+        };
         return this;
     }
 
