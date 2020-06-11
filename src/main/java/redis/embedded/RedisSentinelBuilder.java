@@ -6,6 +6,7 @@ import redis.embedded.exceptions.RedisBuildingException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,9 @@ public class RedisSentinelBuilder {
     private String sentinelConf;
 
     private StringBuilder redisConfigBuilder;
-
+    private PrintStream out = null; //Ignore Redis output.
+    private PrintStream err = System.err; //Forward Redis error messages to STDERR.
+    
     public RedisSentinelBuilder redisExecProvider(RedisExecProvider redisExecProvider) {
         this.redisExecProvider = redisExecProvider;
         return this;
@@ -100,10 +103,39 @@ public class RedisSentinelBuilder {
         return this;
     }
 
+    /**
+     * Redirect Redis server messages sent to STDOUT.
+     * Usage example: 
+     * @code{
+     * 	RedisServerBuilder serverBuilder = RedisServer.builder().outTo(System.out).errTo(System.err);
+		RedisSentinelBuilder sentinelBuilder = new RedisSentinelBuilder().outTo(System.out).errTo(System.err);
+		RedisCluster.builder().withServerBuilder(serverBuilder).withSentinelBuilder(sentinelBuilder)... }
+     * @param out	Stream to redirect Redis output to. 
+     * @return {@code this}
+     */
+    public RedisSentinelBuilder outTo(PrintStream out) {
+    	this.out = out;
+    	return this;
+    }
+
+    /**
+     * Redirect Redis server messages sent to STDERR.
+     * @param err	Stream to redirect Redis output to. 
+     * Usage example: @code{builder.errTo(System.err);}
+     * @return {@code itself}
+     */
+    public RedisSentinelBuilder errTo(PrintStream err) {
+    	this.err = err;
+    	return this;
+    }
+    
     public RedisSentinel build() {
         tryResolveConfAndExec();
         List<String> args = buildCommandArgs();
-        return new RedisSentinel(args, port);
+        RedisSentinel sentinel = new RedisSentinel(args, port);
+        sentinel.outTo(out);
+        sentinel.errTo(err);
+        return sentinel;
     }
 
     private void tryResolveConfAndExec() {

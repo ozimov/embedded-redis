@@ -21,7 +21,9 @@ abstract class AbstractRedisInstance implements Redis {
     private Process redisProcess;
     private final int port;
 
-    private ExecutorService executor;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private PrintStream out = null; //Ignore Redis output.
+    private PrintStream err = System.err; //Forward Redis error messages to STDERR.
 
     protected AbstractRedisInstance(int port) {
         this.port = port;
@@ -52,14 +54,26 @@ abstract class AbstractRedisInstance implements Redis {
 
     private void logErrors() {
         final InputStream errorStream = redisProcess.getErrorStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(errorStream));
-        Runnable printReaderTask = new PrintReaderRunnable(reader);
-        executor = Executors.newSingleThreadExecutor();
-        executor.submit(printReaderTask);
+        copyStreamInBackground(errorStream, err);
     }
 
+	private void copyStreamInBackground(final InputStream copyFrom, PrintStream copyTo) {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(copyFrom));
+        Runnable printReaderTask = new PrintReaderRunnable(reader, copyTo);
+        executor.submit(printReaderTask);
+	}
+
+	public void outTo(PrintStream out) {
+		this.out = out;
+	}
+
+	public void errTo(PrintStream err) {
+		this.err = err;
+	}
+    
     private void awaitRedisServerReady() throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(redisProcess.getInputStream()));
+    	InputStream stdoutStream = redisProcess.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stdoutStream));
         try {
             StringBuffer outputStringBuffer = new StringBuffer();
             String outputLine;
@@ -71,10 +85,18 @@ abstract class AbstractRedisInstance implements Redis {
                 } else {
                     outputStringBuffer.append("\n");
                     outputStringBuffer.append(outputLine);
+                    if(out != null) {
+                    	out.println(outputLine);
+                    }
                 }
             } while (!outputLine.matches(redisReadyPattern()));
         } finally {
-            IOUtils.closeQuietly(reader);
+        	if(out != null) {
+        		/* Continue reading of STDOUT in a background thread. */
+        		copyStreamInBackground(stdoutStream, out);
+        	} else {
+        		IOUtils.closeQuietly(reader);
+        	}
         }
     }
 
@@ -115,9 +137,11 @@ abstract class AbstractRedisInstance implements Redis {
 
     private static class PrintReaderRunnable implements Runnable {
         private final BufferedReader reader;
+		private final PrintStream outputStream;
 
-        private PrintReaderRunnable(BufferedReader reader) {
+        private PrintReaderRunnable(BufferedReader reader, PrintStream outputStream) {
             this.reader = reader;
+            this.outputStream = outputStream;
         }
 
         public void run() {
@@ -132,10 +156,10 @@ abstract class AbstractRedisInstance implements Redis {
             try {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
+                	outputStream.println(line);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                /* reader has been closed. The connected Redis instance has possibly shut down. */
             }
         }
     }

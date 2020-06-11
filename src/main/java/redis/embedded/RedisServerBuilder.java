@@ -6,6 +6,7 @@ import redis.embedded.exceptions.RedisBuildingException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -21,6 +22,8 @@ public class RedisServerBuilder {
     private int port = 6379;
     private InetSocketAddress slaveOf;
     private String redisConf;
+    private PrintStream out = null; //Ignore Redis output.
+    private PrintStream err = System.err; //Forward Redis error messages to STDERR.
 
     private StringBuilder redisConfigBuilder;
 
@@ -71,11 +74,36 @@ public class RedisServerBuilder {
         return this;
     }
 
+    /**
+     * Redirect Redis server messages sent to STDOUT.
+     * Usage example: @code{builder.outTo(System.out);}
+     * @param out	Stream to receive Redis output. 
+     * @return {@code this}
+     */
+    public RedisServerBuilder outTo(PrintStream out) {
+    	this.out = out;
+    	return this;
+    }
+
+    /**
+     * Redirect Redis server messages sent to STDERR.
+     * @param err	Stream to receive Redis output. 
+     * Usage example: @code{builder.errTo(System.err);}
+     * @return {@code itself}
+     */
+    public RedisServerBuilder errTo(PrintStream err) {
+    	this.err = err;
+    	return this;
+    }
+
     public RedisServer build() {
         setting("bind "+bind);
         tryResolveConfAndExec();
         List<String> args = buildCommandArgs();
-        return new RedisServer(args, port);
+        RedisServer server = new RedisServer(args, port);
+        server.outTo(out);
+        server.errTo(err);
+        return server;
     }
 
     public void reset() {
