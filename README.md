@@ -5,22 +5,7 @@ Redis embedded server for Java integration testing
 
 Fork Notes
 ==============
-This repository clones from [kstyrc](https://github.com/kstyrc/embedded-redis) original repository.
-The aim is to release some long waiting fixes.
-
-
-**Source Website:** *[github.com/ozimov/embedded-redis](http://github.com/ozimov/embedded-redis/)*<br />
-
-**Latest Release:** *0.7.3* <br />
-**Latest Artifact:** *it.ozimov:embedded-redis* <br />
-**Continuous Integration:** <br />
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/it.ozimov/embedded-redis/badge.svg)](https://maven-badges.herokuapp.com/maven-central/it.ozimov/embedded-redis)
-<br />
-[![Build Status](https://travis-ci.org/ozimov/embedded-redis.svg?branch=master)](https://travis-ci.org/ozimov/embedded-redis)
-[![codecov.io](https://codecov.io/github/ozimov/embedded-redis/coverage.svg?branch=master)](https://codecov.io/github/ozimov/embedded-redis?branch=master)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/7a4364b93df6473fb18a597e900edceb)](https://www.codacy.com/app/roberto-trunfio/embedded-redis)
-
-![codecov.io](https://codecov.io/github/ozimov/embedded-redis/branch.svg?branch=master)
+This repository is a fork of https://github.com/ozimov/embedded-redis, which is in turn a fork of https://github.com/kstyrc/embedded-redis. We've updated the embedded Redis binaries to version 6.0.5 so we can write tests that use recent Redis features without imposing dependencies that are not well-encapsulated by a single Maven/Gradle build.
 
 Maven dependency
 ==============
@@ -28,9 +13,9 @@ Maven dependency
 Maven Central:
 ```xml
 <dependency>
-  <groupId>it.ozimov</groupId>
+  <groupId>org.signal</groupId>
   <artifactId>embedded-redis</artifactId>
-  <version>0.7.3</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
@@ -154,7 +139,7 @@ second replication group on ```6387, 6379``` and third replication group on ephe
 Redis version
 ==============
 
-When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently it uses:
+When not provided with the desired redis executable, RedisServer runs os-dependent executable enclosed in jar. Currently is uses:
 - Redis 6.0.5 in case of Linux/Unix
 - Redis 6.0.5 in case of OSX
 
@@ -168,16 +153,28 @@ Licensed under the Apache License, Version 2.0
 
 Contributors
 ==============
- * Krzysztof Styrc ([@kstyrc](http://github.com/kstyrc))
- * Piotr Turek ([@turu](http://github.com/turu))
- * anthonyu ([@anthonyu](http://github.com/anthonyu))
- * Artem Orobets ([@enisher](http://github.com/enisher))
- * Sean Simonsen ([@SeanSimonsen](http://github.com/SeanSimonsen))
- * Rob Winch ([@rwinch](http://github.com/rwinch))
-
+ * Krzysztof Styrc ([@kstyrc](https://github.com/kstyrc))
+ * Piotr Turek ([@turu](https://github.com/turu))
+ * anthonyu ([@anthonyu](https://github.com/anthonyu))
+ * Artem Orobets ([@enisher](https://github.com/enisher))
+ * Sean Simonsen ([@SeanSimonsen](https://github.com/SeanSimonsen))
+ * Rob Winch ([@rwinch](https://github.com/rwinch))
+ * Jon Chambers ([@jchambers](https://github.com/jchambers))
 
 Changelog
 ==============
+
+### 0.8
+ * Updated to Redis 6.0.5
+ * Dropped support for Windows
+ * Updated to Guava 29
+
+### 0.7
+ * Updated dependencies
+ * Fixed an incorrect maximum memory setting
+ * Add support for more Redis versions
+ * Bind to 127.0.0.1 by default
+ * Clean up gracefully at JVM exit
 
 ### 0.6
  * Support JDK 6 +
