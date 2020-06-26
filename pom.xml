@@ -122,34 +122,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.9</version>
-                <executions>
-                    <execution>
-                        <id>default-prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>report</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <!-- Partially works for Lombok -->
-                <configuration>
-                    <excludes>
-                        <exclude>**/config/**</exclude>
-                        <exclude>**/model/**</exclude>
-                        <exclude>**/item/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
 
             <!--Deploy plugins -->
             <plugin>
