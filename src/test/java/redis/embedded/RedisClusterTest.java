@@ -108,7 +108,7 @@ public class RedisClusterTest {
             jedis = testPool(pool);
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             cluster.stop();
         }
     }
@@ -127,7 +127,7 @@ public class RedisClusterTest {
             jedis = testPool(pool);
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             cluster.stop();
         }
     }
@@ -146,7 +146,7 @@ public class RedisClusterTest {
             jedis = testPool(pool);
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             cluster.stop();
         }
     }
@@ -165,7 +165,7 @@ public class RedisClusterTest {
             jedis = testPool(pool);
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             cluster.stop();
         }
     }
@@ -186,7 +186,7 @@ public class RedisClusterTest {
             jedis = testPool(pool);
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             cluster.stop();
         }
     }
@@ -220,11 +220,11 @@ public class RedisClusterTest {
             jedis3 = testPool(pool3);
         } finally {
             if (jedis1 != null)
-                pool1.returnResource(jedis1);
+                jedis1.close();
             if (jedis2 != null)
-                pool2.returnResource(jedis2);
+                jedis2.close();
             if (jedis3 != null)
-                pool3.returnResource(jedis3);
+                jedis3.close();
             cluster.stop();
         }
     }
@@ -259,11 +259,11 @@ public class RedisClusterTest {
             jedis3 = testPool(pool3);
         } finally {
             if (jedis1 != null)
-                pool1.returnResource(jedis1);
+                jedis1.close();
             if (jedis2 != null)
-                pool2.returnResource(jedis2);
+                jedis2.close();
             if (jedis3 != null)
-                pool3.returnResource(jedis3);
+                jedis3.close();
             cluster.stop();
         }
     }

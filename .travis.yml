@@ -1,9 +1,9 @@
 language: java
 
-dist: trusty
+dist: bionic
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 install:
     true
