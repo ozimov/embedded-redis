@@ -63,7 +63,7 @@ public class RedisSentinelTest {
             assertNull(jedis.mget("xyz").get(0));
         } finally {
             if (jedis != null)
-                pool.returnResource(jedis);
+                jedis.close();
             sentinel.stop();
             server.stop();
         }
